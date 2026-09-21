@@ -1201,3 +1201,46 @@ a:not(.btn):not(.nav-links a):not(.brand):hover {
 .net-label small {
   font-size: 11px;
 }
+
+/* --- Quick facts ------------------------------------------------------
+   Definition-list of short factual answers on the About page. Structured as
+   dt/dd because that pairing is unambiguous for anything parsing raw HTML,
+   and it reads correctly to a screen reader as a term/description list.
+   -------------------------------------------------------------------- */
+
+.facts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+  gap: 14px;
+  margin: 0;
+}
+
+.facts-grid .fact {
+  background: linear-gradient(180deg, var(--surface-2) 0%, var(--surface) 100%);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: clamp(18px, 1.8vw, 24px);
+  box-shadow: var(--shadow-1);
+  transition:
+    border-color var(--dur) var(--ease),
+    transform var(--dur) var(--ease-out);
+}
+
+.facts-grid .fact:hover {
+  border-color: var(--acid-line);
+  transform: translateY(-2px);
+}
+
+.facts-grid dt {
+  font: 600 13px var(--mono);
+  letter-spacing: 0.06em;
+  color: var(--acid);
+  margin-bottom: 8px;
+}
+
+.facts-grid dd {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.65;
+  max-width: none;
+}
