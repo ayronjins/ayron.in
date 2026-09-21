@@ -1,5 +1,80 @@
+# robots.txt for ayron.in
+#
+# Policy: this is a personal portfolio whose owner WANTS to be found, cited and
+# linked by search engines and AI answer engines. Every vendor below has split
+# "training" from "search/retrieval" into separate user-agent tokens, so the
+# retrieval crawlers are allowed explicitly and by name.
+#
+# Every rule here is grounded in the vendor's own documentation:
+#   OpenAI      https://platform.openai.com/docs/bots
+#   Anthropic   https://support.claude.com/en/articles/8896518
+#   Perplexity  https://docs.perplexity.ai/guides/bots
+#   Google      https://developers.google.com/search/docs/appearance/ai-features
+#   Apple       https://support.apple.com/en-us/119829
+#   DuckDuckGo  https://duckduckgo.com/duckduckgo-help-pages/results/duckassistbot/
+#   Meta        https://developers.facebook.com/docs/sharing/webmasters/web-crawlers
+#
+# Note: the default below is already Allow: /. The named groups are therefore
+# redundant in pure robots.txt semantics, but they are deliberate: they record
+# an explicit, reviewable policy decision per crawler, and they protect the
+# intent if a restrictive default is ever introduced.
+
+# --- Default ---------------------------------------------------------------
 User-agent: *
 Allow: /
 Disallow: /assets/private/
 
+# --- Search engines --------------------------------------------------------
+# Googlebot also governs AI Overviews and AI Mode, which are Search features.
+User-agent: Googlebot
+Allow: /
+
+User-agent: bingbot
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+# --- AI retrieval / answer engines -----------------------------------------
+# These are what make the site quotable in AI answers. OpenAI: sites opted out
+# of OAI-SearchBot "will not be shown in ChatGPT search answers".
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+# Anthropic: disabling Claude-SearchBot "may reduce your site's visibility
+# and accuracy in user search results".
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: Claude-User
+Allow: /
+
+# Perplexity explicitly recommends allowing PerplexityBot to appear in results.
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+# DuckDuckGo's AI answers cite their sources and are not used for training.
+User-agent: DuckAssistBot
+Allow: /
+
+# Meta's citation crawler. Distinct from meta-externalagent, which is training.
+User-agent: Meta-WebIndexer
+Allow: /
+
+# Google-Extended controls Gemini training AND Gemini app grounding. Allowing
+# it does not affect Google Search either way; it is allowed here because
+# grounding is what lets Gemini cite this site.
+User-agent: Google-Extended
+Allow: /
+
+# --- Sitemap ---------------------------------------------------------------
 Sitemap: https://ayron.in/sitemap.xml

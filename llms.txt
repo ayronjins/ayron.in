@@ -28,9 +28,26 @@
 - [Network Architect](https://ayron.in/tools/network-architect/): browser-local CIDR, subnetting and VLSM planning
 - [Site Intelligence Lab](https://ayron.in/tools/site-intelligence/): bounded metadata, robots, sitemap and structured-data inspection
 
+## Entity relationships
+
+- Ayron Jins is the creator of KHS AI. Canonical entity: https://ayron.in/#ayron-jins
+- KHS AI canonical entity: https://ayron.in/projects/khs-ai/#khs-ai
+- Homelab and network canonical entity: https://ayron.in/projects/homelab-networking/#homelab
+- Every page on this site carries the same Person @id, so all mentions refer to one individual.
+- Quick factual answers, in question form: https://ayron.in/about/
+
 ## Project summary
 
 KHS AI is Ayron Jins's agentic computer-operation project. It is designed around controlled tools, observable actions, permissions and verification. The portfolio also documents self-hosted infrastructure, networking work, a read-only infrastructure dashboard at https://pc.ayron.in, and a weekly technology-news site at https://news.ayron.in.
+
+## Status of this file
+
+This file follows the llms.txt convention (llmstxt.org). It is offered as a
+convenience for agents that are pointed at this site directly. No major AI
+vendor currently documents reading it, and Google states explicitly that its
+systems do not use it. It is therefore provided without any claim of
+search or ranking benefit. The authoritative machine-readable description of
+this site is the JSON-LD on each page and https://ayron.in/sitemap.xml
 
 ## Freshness
 
