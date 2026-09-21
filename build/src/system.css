@@ -1244,3 +1244,20 @@ a:not(.btn):not(.nav-links a):not(.brand):hover {
   line-height: 1.65;
   max-width: none;
 }
+
+/* Authorship note: body-level path from any topic page back to the identity. */
+.authorship {
+  padding-block: clamp(28px, 4vw, 44px) clamp(40px, 6vw, 64px);
+}
+.authorship-note {
+  max-width: var(--readable);
+  margin: 0;
+  padding-top: 20px;
+  border-top: 1px solid var(--line-soft);
+  color: var(--muted);
+  font-size: 14.5px;
+  line-height: 1.65;
+}
+.authorship-note a {
+  color: var(--ink);
+}
