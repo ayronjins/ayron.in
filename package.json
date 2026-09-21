@@ -1,0 +1,23 @@
+{
+  "name": "ayron-in-portfolio",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Static portfolio for ayron.in. Readable sources in build/src are minified to assets/ with inline-source sourcemaps, so the shipped bundle stays small while the real source remains inspectable in DevTools.",
+  "license": "UNLICENSED",
+  "author": "Ayron Jins <Ayronjins4@gmail.com> (https://ayron.in)",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "format": "prettier --write \"build/src/*.{css,js}\"",
+    "check:format": "prettier --check \"build/src/*.{css,js}\"",
+    "build": "node build/build.mjs",
+    "verify": "node build/verify.mjs",
+    "test": "npm run check:format && npm run build && npm run verify"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "prettier": "^3.4.0"
+  }
+}

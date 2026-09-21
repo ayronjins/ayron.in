@@ -1,0 +1,17 @@
+{
+  "name": "Ayron Jins Engineering Portfolio",
+  "short_name": "Ayron Jins",
+  "description": "Official portfolio of Ayron Jins, a student systems builder working on AI agents, Linux infrastructure, networking, self-hosted services and software.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#080b0a",
+  "theme_color": "#080b0a",
+  "icons": [
+    {
+      "src": "/assets/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

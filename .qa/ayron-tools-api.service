@@ -1,0 +1,22 @@
+[Unit]
+Description=Ayron Tools API
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ayron
+Group=ayron
+WorkingDirectory=/home/ayron/khs-ai-portfolio/tools-api
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/home/ayron/.venvs/ayron-tools/bin/uvicorn app.main:app --host 127.0.0.1 --port 3100 --workers 1
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=read-only
+ReadWritePaths=/home/ayron/khs-ai-portfolio/tools-api
+
+[Install]
+WantedBy=multi-user.target
