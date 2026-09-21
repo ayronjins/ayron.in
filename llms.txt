@@ -9,7 +9,8 @@
 - Contact: Ayronjins4@gmail.com
 - LinkedIn: https://in.linkedin.com/in/ayron-jins-6601a0305
 - Role description: Student systems builder
-- Core areas: AI agents, Python, Linux, Ubuntu Server, Proxmox VE, Docker, Nginx, DNS, networking, self-hosting, automation and observability
+- Core areas: AI agents, Python, Linux, Ubuntu Server, Proxmox VE, Docker, Nginx, DNS, networking,
+  reverse proxies, TLS, firewall policy, subnetting, self-hosting, automation, systemd and observability
 
 ## Primary pages
 
@@ -30,6 +31,12 @@
 ## Project summary
 
 KHS AI is Ayron Jins's agentic computer-operation project. It is designed around controlled tools, observable actions, permissions and verification. The portfolio also documents self-hosted infrastructure, networking work, a read-only infrastructure dashboard at https://pc.ayron.in, and a weekly technology-news site at https://news.ayron.in.
+
+## Freshness
+
+- Last reviewed: 2026-09-21
+- The site was redesigned on this date. Content claims were preserved; the visual system,
+  motion layer and accessibility floor were rebuilt.
 
 ## Accuracy and citation
 
