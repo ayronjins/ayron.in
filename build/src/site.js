@@ -147,18 +147,54 @@ if (homeTopology) {
       y: (edge === "top" ? rect.top : rect.bottom) - canvasRect.top,
     };
   };
-  const direct = (from, to) => {
-    const a = anchor(from, "bottom"),
-      b = anchor(to, "top"),
-      mid = a.y + (b.y - a.y) / 2;
-    return `M ${a.x} ${a.y} V ${mid} H ${b.x} V ${b.y}`;
+  /**
+   * Orthogonal elbow between two node anchors.
+   *
+   * Geometry notes:
+   *   - Coordinates are rounded to 0.5px. Sub-pixel path data made the strokes
+   *     render blurry against the 1px grid.
+   *   - When two nodes are vertically aligned the horizontal leg has zero
+   *     length, and `V y1 H x V y2` then draws a degenerate corner that shows
+   *     as a kink. In that case emit a single straight line instead.
+   *   - The elbow corners are rounded with a quadratic curve so the routes read
+   *     as cable runs rather than hard CAD corners.
+   */
+  const R = 7; // corner radius
+  const q = (n) => Math.round(n * 2) / 2;
+  const elbow = (a, b, split) => {
+    const ax = q(a.x),
+      ay = q(a.y),
+      bx = q(b.x),
+      by = q(b.y),
+      my = q(a.y + (b.y - a.y) * split);
+    // Vertically aligned: no horizontal leg exists, so draw straight down.
+    if (Math.abs(bx - ax) < 1) return `M ${ax} ${ay} V ${by}`;
+    // Not enough vertical room to round the corners: fall back to sharp.
+    if (Math.abs(my - ay) < R * 2 || Math.abs(by - my) < R * 2) {
+      return `M ${ax} ${ay} V ${my} H ${bx} V ${by}`;
+    }
+    const dir = bx > ax ? 1 : -1;
+    // One radius for both axes. Using different horizontal and vertical values
+    // left the curve control points mismatched, which pulled the horizontal leg
+    // short of the target node and made branches look disconnected.
+    const r = Math.min(
+      R,
+      Math.abs(bx - ax) / 2,
+      Math.abs(my - ay),
+      Math.abs(by - my),
+    );
+    return (
+      `M ${ax} ${ay} V ${q(my - r)} ` +
+      `Q ${ax} ${my} ${q(ax + dir * r)} ${my} ` +
+      `H ${q(bx - dir * r)} ` +
+      `Q ${bx} ${my} ${bx} ${q(my + r)} ` +
+      `V ${by}`
+    );
   };
-  const branch = (to) => {
-    const a = anchor(nodes.lab, "bottom"),
-      b = anchor(to, "top"),
-      junction = a.y + (b.y - a.y) * 0.42;
-    return `M ${a.x} ${a.y} V ${junction} H ${b.x} V ${b.y}`;
-  };
+  const direct = (from, to) =>
+    elbow(anchor(from, "bottom"), anchor(to, "top"), 0.5);
+  const branch = (to) =>
+    elbow(anchor(nodes.lab, "bottom"), anchor(to, "top"), 0.42);
   function layoutHomeTopology() {
     const rect = canvas.getBoundingClientRect();
     svg.setAttribute("viewBox", `0 0 ${rect.width} ${rect.height}`);

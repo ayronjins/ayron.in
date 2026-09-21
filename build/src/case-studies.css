@@ -24,7 +24,7 @@
   background: var(--surface);
   padding: 8px 10px;
   color: var(--muted);
-  font: 10px var(--mono);
+  font: 11px var(--mono);
   letter-spacing: 0.05em;
 }
 .case-badges b {
@@ -127,7 +127,7 @@
 }
 .case-node small {
   color: var(--acid);
-  font: 10px var(--mono);
+  font: 11px var(--mono);
   letter-spacing: 0.07em;
 }
 .case-node strong {
@@ -173,7 +173,7 @@
 .case-metrics b {
   display: block;
   color: var(--acid);
-  font: 10px var(--mono);
+  font: 11px var(--mono);
   letter-spacing: 0.08em;
 }
 .case-metrics span {

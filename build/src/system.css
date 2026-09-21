@@ -1,0 +1,1203 @@
+/**
+ * ayron.in — Instrumented Depth design layer
+ * ------------------------------------------
+ * Loaded AFTER site.css on every page. This file does not replace the existing
+ * stylesheet; it re-grounds it. The page HTML is untouched, so every route,
+ * every piece of copy and every tool keeps working exactly as before while the
+ * visual system underneath is rebuilt.
+ *
+ * Why an overlay rather than a rewrite:
+ *   - 15 pages share two assets. Retokenising here changes all of them at once.
+ *   - Zero risk to structured data, canonicals, or tool logic.
+ *   - The original stylesheet remains readable as the component layer.
+ *
+ * Structure:
+ *   1. Tokens          — palette, depth, motion constants
+ *   2. Base            — typography, rhythm, focus
+ *   3. Depth           — surfaces, borders, elevation
+ *   4. Components      — header, cards, buttons, diagrams, footer
+ *   5. Motion          — reveal, spotlight, rails, signal flow
+ *   6. Responsive      — mobile refinements
+ *   7. Reduced motion  — full opt-out
+ */
+
+/* ============================================================
+   1. TOKENS
+   ============================================================ */
+
+:root {
+  /* --- Base surfaces: real luminance steps, not 3% apart --- */
+  --bg: #070a09;
+  --bg-deep: #040605;
+  --surface: #0c120f;
+  --surface-2: #131b17;
+  --surface-3: #1a251f;
+  --surface-hi: #212e27;
+
+  /* --- Ink --- */
+  --ink: #f0f5f1;
+  --text-primary: #f0f5f1;
+  --muted: #b3c1b8;
+  --text-secondary: #b3c1b8;
+  --faint: #8b9a90; /* lifted from #64736a to clear AA on --bg */
+
+  /* --- Lines: three tiers, not one hairline everywhere --- */
+  --line: #253329;
+  --line-soft: #1a2620;
+  --line-strong: #35483b;
+  --rim: rgba(255, 255, 255, 0.06); /* inset top highlight */
+
+  /* --- Signal: same lime identity, lower chroma, used sparingly --- */
+  --acid: #b8f078;
+  --acid-bright: #d3ff9a;
+  --acid-deep: #5fbf7a;
+  --acid-soft: rgba(184, 240, 120, 0.09);
+  --acid-line: rgba(184, 240, 120, 0.28);
+  --acid-glow: rgba(184, 240, 120, 0.16);
+
+  --teal: #6fd6c8;
+  --amber: #f0cd83;
+  --red: #f2949a;
+
+  /* --- Elevation --- */
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.25);
+  --shadow-2: 0 2px 4px rgba(0, 0, 0, 0.45), 0 12px 32px rgba(0, 0, 0, 0.35);
+  --shadow-3: 0 4px 8px rgba(0, 0, 0, 0.5), 0 24px 64px rgba(0, 0, 0, 0.45);
+
+  /* --- Motion constants --- */
+  --ease: cubic-bezier(0.22, 0.61, 0.22, 1);
+  --ease-spring: cubic-bezier(0.34, 1.32, 0.48, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-fast: 180ms;
+  --dur: 320ms;
+  --dur-slow: 620ms;
+
+  --radius: 14px;
+  --radius-sm: 9px;
+  --radius-lg: 20px;
+}
+
+/* ============================================================
+   2. BASE
+   ============================================================ */
+
+html {
+  scroll-behavior: smooth;
+  /* Stop the scroll rail and anchors from hiding under the sticky header */
+  scroll-padding-top: 92px;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Ambient field: two very low-alpha radials + a fine grid.
+   Fixed, non-interactive, behind everything. Gives the black page air. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse 900px 620px at 12% -8%,
+      rgba(95, 191, 122, 0.06),
+      transparent 62%
+    ),
+    radial-gradient(
+      ellipse 760px 520px at 88% 4%,
+      rgba(111, 214, 200, 0.045),
+      transparent 60%
+    ),
+    var(--bg);
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.4;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.014) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.014) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(
+    ellipse 100% 70% at 50% 0%,
+    #000 20%,
+    transparent 78%
+  );
+  -webkit-mask-image: radial-gradient(
+    ellipse 100% 70% at 50% 0%,
+    #000 20%,
+    transparent 78%
+  );
+}
+
+/* --- Display type: tighter, optically spaced at scale --- */
+h1,
+.section-title,
+.landing-hero h1 {
+  letter-spacing: -0.028em;
+  line-height: 1.04;
+}
+
+h2,
+h3 {
+  letter-spacing: -0.018em;
+}
+
+h1 {
+  font-size: clamp(2.6rem, 6.4vw, 5.1rem);
+  font-weight: 600;
+}
+
+.section-title {
+  font-size: clamp(1.7rem, 3.3vw, 2.7rem);
+  font-weight: 600;
+}
+
+p {
+  max-width: 68ch;
+  color: var(--text-secondary);
+  line-height: 1.68;
+}
+
+/* --- Mono labels: the site's signature. Refined, not shouted. --- */
+.section-kicker,
+.project-label,
+.ai-label,
+.net-label,
+.case-label,
+.tool-kicker,
+.section-index,
+.landing-section-index,
+.mono {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+.section-kicker,
+.tool-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+  color: var(--acid);
+}
+
+/* Leading tick mark on kickers — a small instrument detail */
+.section-kicker::before,
+.tool-kicker::before {
+  content: "";
+  width: 14px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.7;
+  flex: none;
+}
+
+/* --- Focus: visible, branded, never suppressed --- */
+:focus-visible {
+  outline: 2px solid var(--acid);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+::selection {
+  background: var(--acid);
+  color: #08120a;
+}
+
+/* ============================================================
+   3. DEPTH
+   ============================================================ */
+
+/* Every card-like surface gets: gradient fill, structural border,
+   inset top rim, ambient shadow. This is what creates the z-axis. */
+.reference-card,
+.category-card,
+.project-card,
+.case-panel,
+.ai-card,
+.net-card,
+.layer-card,
+.service-card,
+.tool-panel,
+.proof-card,
+.interest-card,
+.principle-card,
+.explore-card,
+.case-study-card,
+.tech-card,
+.break-card,
+.stack-item,
+.ai-panel,
+.skill-group {
+  position: relative;
+  background: linear-gradient(180deg, var(--surface-2) 0%, var(--surface) 100%);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-1);
+  transition:
+    transform var(--dur) var(--ease-out),
+    border-color var(--dur) var(--ease),
+    box-shadow var(--dur) var(--ease-out),
+    background var(--dur) var(--ease);
+  isolation: isolate;
+}
+
+/* Inset top rim — catches "light" and separates card from background */
+.reference-card::before,
+.category-card::before,
+.project-card::before,
+.case-panel::before,
+.ai-card::before,
+.net-card::before,
+.layer-card::before,
+.service-card::before,
+.tool-panel::before,
+.proof-card::before,
+.interest-card::before,
+.principle-card::before,
+.explore-card::before,
+.case-study-card::before,
+.tech-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--rim) 22%,
+    var(--rim) 78%,
+    transparent
+  );
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Pointer spotlight layer. --mx/--my are written by motion.js in percent.
+   Opacity is driven by --spot (0 → 1) so it fades cleanly on pointer leave. */
+.reference-card::after,
+.category-card::after,
+.project-card::after,
+.ai-card::after,
+.net-card::after,
+.layer-card::after,
+.service-card::after,
+.proof-card::after,
+.interest-card::after,
+.principle-card::after,
+.explore-card::after,
+.case-study-card::after,
+.tech-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 1;
+  opacity: var(--spot, 0);
+  transition: opacity var(--dur) var(--ease);
+  background: radial-gradient(
+    380px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(184, 240, 120, 0.1),
+    rgba(184, 240, 120, 0.03) 38%,
+    transparent 66%
+  );
+}
+
+/* Lift on hover — small, spring-eased, never a jump */
+.reference-card:hover,
+.category-card:hover,
+.project-card:hover,
+.ai-card:hover,
+.net-card:hover,
+.layer-card:hover,
+.service-card:hover,
+.proof-card:hover,
+.interest-card:hover,
+.principle-card:hover,
+.explore-card:hover,
+.case-study-card:hover,
+.tech-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--acid-line);
+  box-shadow:
+    var(--shadow-2),
+    0 0 0 1px rgba(184, 240, 120, 0.08);
+}
+
+/* Card interiors: guarantee breathing room and stop long technical strings
+   (domains, CIDR ranges, paths) from pushing text through the border. */
+.reference-card,
+.category-card,
+.project-card,
+.ai-card,
+.net-card,
+.layer-card,
+.service-card,
+.proof-card,
+.interest-card,
+.principle-card,
+.explore-card,
+.case-study-card,
+.tech-card {
+  padding: clamp(20px, 2vw, 30px);
+  overflow-wrap: anywhere;
+}
+
+/* Card body copy is measured by the card, not by the global 68ch cap */
+.reference-card p,
+.category-card p,
+.project-card p,
+.ai-card p,
+.net-card p,
+.layer-card p,
+.service-card p,
+.proof-card p,
+.interest-card p,
+.principle-card p,
+.explore-card p,
+.case-study-card p,
+.tech-card p {
+  max-width: none;
+}
+
+/* Flagship panel reads one tier higher than a normal card */
+.case-panel {
+  background: linear-gradient(180deg, var(--surface-3) 0%, var(--surface) 92%);
+  border-color: var(--line-strong);
+  box-shadow: var(--shadow-3);
+}
+
+/* ============================================================
+   4. COMPONENTS
+   ============================================================ */
+
+/* --- Skip link ---------------------------------------------------------
+   Keyboard affordance only. An earlier revision surfaced this as a permanent
+   button on touch devices; it overlapped the header and covered the brand and
+   menu, which is worse than the problem it tried to solve. Touch users already
+   have the header menu to navigate with, so the standard focus-only behaviour
+   is correct here.
+
+   It slides down from above the viewport on focus and never occupies layout
+   space otherwise.
+   ---------------------------------------------------------------------- */
+
+.skip-link {
+  position: fixed;
+  left: 50%;
+  top: 10px;
+  z-index: 1000;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 12px 18px;
+  min-height: 44px;
+  /* Explicit colour first: the gradient is the finish, but a solid
+     background-color guarantees the contrast pairing is real even where the
+     gradient does not paint. */
+  background-color: var(--acid);
+  background-image: linear-gradient(180deg, var(--acid-bright), var(--acid));
+  color: #08120a;
+  border: 1px solid rgba(184, 240, 120, 0.55);
+  border-radius: 999px;
+  font: 600 12px var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(184, 240, 120, 0.2);
+  transform: translate(-50%, -220%);
+  transition:
+    transform 320ms var(--ease-spring),
+    box-shadow var(--dur) var(--ease);
+}
+
+.skip-link::before {
+  content: "\2193";
+  font-size: 1.05em;
+  line-height: 1;
+}
+
+.skip-link:focus,
+.skip-link:focus-visible {
+  transform: translate(-50%, 0);
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+
+/* --- Header: glass, with a hairline that only appears once scrolled --- */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 90;
+  background: rgba(7, 10, 9, 0.72);
+  backdrop-filter: saturate(150%) blur(18px);
+  -webkit-backdrop-filter: saturate(150%) blur(18px);
+  border-bottom: 1px solid transparent;
+  transition:
+    border-color var(--dur) var(--ease),
+    background var(--dur) var(--ease);
+}
+
+.site-header.is-scrolled {
+  background: rgba(7, 10, 9, 0.9);
+  border-bottom-color: var(--line);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.32);
+}
+
+/* Nav links: the underline grows from the left, it does not fade in */
+.nav-links a {
+  position: relative;
+  color: var(--muted);
+  transition: color var(--dur-fast) var(--ease);
+}
+
+.nav-links a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -5px;
+  height: 1px;
+  width: 100%;
+  background: var(--acid);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--dur) var(--ease-out);
+}
+
+.nav-links a:hover,
+.nav-links a[aria-current] {
+  color: var(--ink);
+}
+
+.nav-links a:hover::after,
+.nav-links a[aria-current]::after {
+  transform: scaleX(1);
+}
+
+/* Brand mark rotates on hover — a single causal detail */
+.brand-mark {
+  transition: transform var(--dur-slow) var(--ease-spring);
+}
+
+.brand:hover .brand-mark {
+  transform: rotate(135deg);
+}
+
+/* Status dot: this one loop is allowed. It reports live state, which is
+   the point of the site. Everything else is causal. */
+.status-dot {
+  position: relative;
+}
+
+.status-dot::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 1px solid var(--acid);
+  opacity: 0;
+  animation: ayr-ping 2.8s var(--ease-out) infinite;
+}
+
+@keyframes ayr-ping {
+  0% {
+    transform: scale(0.7);
+    opacity: 0.8;
+  }
+  70%,
+  100% {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+}
+
+/* --- Buttons --- */
+.btn {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  transition:
+    transform var(--dur) var(--ease-spring),
+    box-shadow var(--dur) var(--ease-out),
+    border-color var(--dur) var(--ease),
+    color var(--dur-fast) var(--ease);
+  will-change: transform;
+}
+
+/* Sheen sweeps across on hover — travels, does not blink */
+.btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 28%,
+    rgba(255, 255, 255, 0.16) 48%,
+    transparent 68%
+  );
+  transform: translateX(-120%);
+  transition: transform var(--dur-slow) var(--ease-out);
+  pointer-events: none;
+}
+
+.btn:hover::before {
+  transform: translateX(120%);
+}
+
+.btn-primary,
+.btn.primary {
+  background: linear-gradient(180deg, var(--acid-bright), var(--acid));
+  color: #081109;
+  border: 1px solid rgba(184, 240, 120, 0.5);
+  font-weight: 600;
+}
+
+.btn-primary:hover,
+.btn.primary:hover {
+  box-shadow:
+    0 8px 26px rgba(184, 240, 120, 0.24),
+    0 0 0 1px rgba(184, 240, 120, 0.4);
+}
+
+.btn:not(.btn-primary):not(.primary) {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  color: var(--ink);
+}
+
+.btn:not(.btn-primary):not(.primary):hover {
+  border-color: var(--acid-line);
+  background: var(--surface-3);
+  box-shadow: var(--shadow-1);
+}
+
+.btn:active {
+  transform: scale(0.975);
+}
+
+/* --- Tool controls keep the same language --- */
+.tool-btn {
+  border-radius: var(--radius-sm);
+  transition:
+    transform var(--dur) var(--ease-spring),
+    border-color var(--dur) var(--ease);
+}
+
+.tool-btn:hover {
+  border-color: var(--acid-line);
+}
+
+.tool-field input,
+.tool-field select,
+.tool-form input,
+.tool-form select {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  transition:
+    border-color var(--dur-fast) var(--ease),
+    box-shadow var(--dur-fast) var(--ease),
+    background var(--dur-fast) var(--ease);
+}
+
+.tool-field input:focus,
+.tool-field select:focus,
+.tool-form input:focus,
+.tool-form select:focus {
+  border-color: var(--acid-line);
+  background: var(--surface-2);
+  box-shadow: 0 0 0 3px var(--acid-soft);
+  outline: none;
+}
+
+/* --- Tag chips --- */
+.tool-tags span,
+.skill-tags span,
+.tech-list li {
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  transition:
+    border-color var(--dur-fast) var(--ease),
+    color var(--dur-fast) var(--ease),
+    transform var(--dur-fast) var(--ease-spring);
+}
+
+.tool-tags span:hover,
+.skill-tags span:hover,
+.tech-list li:hover {
+  border-color: var(--acid-line);
+  color: var(--acid);
+  transform: translateY(-1px);
+}
+
+/* --- Section heads get a measured rule, not a bare gap --- */
+.section-head,
+.landing-section-head {
+  position: relative;
+}
+
+.section-head::after,
+.landing-section-head::after {
+  content: "";
+  display: block;
+  height: 1px;
+  margin-top: 1.5rem;
+  /* Hold the structural line most of the way across before fading. The
+     earlier gradient dropped to transparent by 85% and read as a stray mark
+     rather than a divider. */
+  background: linear-gradient(
+    90deg,
+    var(--acid-line),
+    var(--line-strong) 22%,
+    var(--line) 70%,
+    transparent
+  );
+}
+
+/* --- Diagram surfaces --- */
+.detail-topology-shell,
+.detail-topology,
+.case-flow {
+  background: linear-gradient(180deg, var(--surface) 0%, var(--bg-deep) 100%);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-2);
+}
+
+/* --- Footer --- */
+.site-footer {
+  border-top: 1px solid var(--line);
+  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.35));
+}
+
+.site-footer a {
+  transition: color var(--dur-fast) var(--ease);
+}
+
+.site-footer a:hover {
+  color: var(--acid);
+}
+
+/* ============================================================
+   5. MOTION
+   ============================================================ */
+
+/* --- Scroll progress rail: reports position, top of viewport --- */
+.ayr-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  width: 100%;
+  z-index: 200;
+  transform-origin: 0 50%;
+  transform: scaleX(var(--p, 0));
+  background: linear-gradient(
+    90deg,
+    var(--acid-deep),
+    var(--acid),
+    var(--teal)
+  );
+  box-shadow: 0 0 12px var(--acid-glow);
+  pointer-events: none;
+}
+
+/* --- Staggered reveal.
+   The existing site.js adds .visible; we redefine what .reveal means.
+   Blur + lift + fade, sequenced by --i set in motion.js. --- */
+.reveal {
+  opacity: 0;
+  transform: translate3d(0, 26px, 0);
+  filter: blur(6px);
+  transition:
+    opacity var(--dur-slow) var(--ease-out),
+    transform var(--dur-slow) var(--ease-out),
+    filter var(--dur-slow) var(--ease-out);
+  transition-delay: calc(var(--i, 0) * 65ms);
+  will-change: transform, opacity;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  filter: blur(0);
+}
+
+/* Release will-change once settled so we don't hold compositor layers */
+.reveal.visible.ayr-settled {
+  will-change: auto;
+}
+
+/* --- Heading mask reveal: each line wipes up from a clip --- */
+.ayr-line {
+  display: block;
+  overflow: hidden;
+}
+
+.ayr-line > span {
+  display: block;
+  transform: translate3d(0, 112%, 0);
+  transition: transform 820ms var(--ease-out);
+  transition-delay: calc(var(--i, 0) * 85ms);
+}
+
+.ayr-in .ayr-line > span {
+  transform: translate3d(0, 0, 0);
+}
+
+/* --- Magnetic elements: motion.js writes --tx/--ty in px --- */
+.ayr-magnetic {
+  transform: translate3d(var(--tx, 0), var(--ty, 0), 0);
+  transition: transform 420ms var(--ease-spring);
+}
+
+.ayr-magnetic.ayr-tracking {
+  transition: transform 120ms linear;
+}
+
+/* --- Signal flow: packets travel real diagram paths --- */
+.ayr-packet {
+  fill: var(--acid);
+  filter: drop-shadow(0 0 5px var(--acid-glow));
+}
+
+/* --- Counter readouts land with a tick --- */
+.ayr-counting {
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Link underlines that draw rather than appear --- */
+a:not(.btn):not(.nav-links a):not(.brand) {
+  /* Two layers: a permanent faint rule so the link stays discoverable without
+     hovering, and the accent rule that draws across it on hover. */
+  background-image:
+    linear-gradient(var(--acid), var(--acid)),
+    linear-gradient(var(--line-strong), var(--line-strong));
+  background-size:
+    0% 1px,
+    100% 1px;
+  background-position:
+    0 100%,
+    0 100%;
+  background-repeat: no-repeat;
+  text-decoration: none;
+  transition:
+    background-size var(--dur) var(--ease-out),
+    color var(--dur-fast) var(--ease);
+}
+
+a:not(.btn):not(.nav-links a):not(.brand):hover {
+  background-size:
+    100% 1px,
+    100% 1px;
+  color: var(--acid);
+}
+
+/* --- Cross-page view transitions (progressive enhancement) --- */
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root) {
+  animation: ayr-vt-out 220ms var(--ease) both;
+}
+
+::view-transition-new(root) {
+  animation: ayr-vt-in 360ms var(--ease-out) both;
+}
+
+@keyframes ayr-vt-out {
+  to {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes ayr-vt-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+/* ============================================================
+   6. RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 860px) {
+  html {
+    scroll-padding-top: 76px;
+  }
+
+  h1 {
+    font-size: clamp(2.1rem, 9vw, 3.1rem);
+  }
+
+  .section-title {
+    font-size: clamp(1.45rem, 6vw, 2rem);
+  }
+
+  /* Hover lift is meaningless on touch; drop it and the spotlight cost */
+  .reference-card:hover,
+  .category-card:hover,
+  .project-card:hover,
+  .ai-card:hover,
+  .net-card:hover,
+  .layer-card:hover,
+  .service-card:hover,
+  .proof-card:hover,
+  .interest-card:hover,
+  .principle-card:hover,
+  .explore-card:hover,
+  .case-study-card:hover,
+  .tech-card:hover {
+    transform: none;
+  }
+
+  body::after {
+    background-size: 44px 44px;
+  }
+
+  .reveal {
+    transform: translate3d(0, 18px, 0);
+    filter: blur(4px);
+  }
+}
+
+/* Touch/coarse pointers never get spotlight or magnetism */
+@media (hover: none) {
+  .ayr-magnetic {
+    transform: none;
+  }
+}
+
+/* ============================================================
+   7. REDUCED MOTION — complete opt-out
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+
+  .ayr-line > span {
+    transform: none;
+  }
+
+  .ayr-magnetic {
+    transform: none;
+  }
+
+  .status-dot::after {
+    animation: none;
+    opacity: 0;
+  }
+
+  .ayr-packet {
+    display: none;
+  }
+
+  @view-transition {
+    navigation: none;
+  }
+}
+
+/* ============================================================
+   8. HIDDEN LAYER — styling for the things you have to find
+   ============================================================ */
+
+.ayr-egg-panel {
+  position: fixed;
+  right: clamp(12px, 3vw, 32px);
+  bottom: clamp(12px, 3vw, 32px);
+  z-index: 500;
+  width: min(520px, calc(100vw - 24px));
+  max-height: min(70vh, 560px);
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, var(--surface-2), var(--bg-deep));
+  border: 1px solid var(--acid-line);
+  border-radius: var(--radius);
+  box-shadow:
+    var(--shadow-3),
+    0 0 0 1px rgba(184, 240, 120, 0.1);
+  animation: ayr-egg-in 420ms var(--ease-out) both;
+  overflow: hidden;
+}
+
+@keyframes ayr-egg-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+  }
+}
+
+.ayr-egg-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(184, 240, 120, 0.06);
+  font: 600 11px var(--mono);
+  letter-spacing: 0.14em;
+  color: var(--acid);
+  flex: none;
+}
+
+.ayr-egg-close {
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--muted);
+  cursor: pointer;
+  width: 26px;
+  height: 26px;
+  line-height: 1;
+  transition:
+    border-color var(--dur-fast) var(--ease),
+    color var(--dur-fast) var(--ease);
+}
+
+.ayr-egg-close:hover {
+  border-color: var(--acid-line);
+  color: var(--acid);
+}
+
+.ayr-egg-body {
+  margin: 0;
+  padding: 14px;
+  overflow: auto;
+  font: 12px/1.65 var(--mono);
+  color: var(--muted);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.ayr-rain {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  pointer-events: none;
+  transition: opacity 400ms linear;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ayr-egg-panel {
+    animation: none;
+  }
+
+  .ayr-rain {
+    display: none;
+  }
+}
+
+/* --- Topology diagram -------------------------------------------------
+   The base routes were drawn at #4c6b58 / 0.85, which sits close enough to
+   the background that the branch lines looked broken or absent rather than
+   inactive. Lift the idle stroke so the whole graph is legible, and keep the
+   active trace clearly brighter so the contrast still carries meaning.
+   -------------------------------------------------------------------- */
+
+.home-topology-base,
+.detail-topology-base {
+  stroke: #6f8f79;
+  stroke-width: 1.6;
+  opacity: 1;
+}
+
+.home-topology-active,
+.detail-topology-active {
+  stroke: var(--acid-bright);
+  stroke-width: 2.2;
+  filter: drop-shadow(0 0 6px var(--acid-glow));
+}
+
+/* Node chrome: match the card depth system rather than the old flat fill. */
+.home-topology-node,
+.detail-node {
+  border: 1px solid var(--line-strong);
+  background: linear-gradient(180deg, var(--surface-2), var(--surface));
+  box-shadow: var(--shadow-1);
+  transition:
+    border-color var(--dur) var(--ease),
+    background var(--dur) var(--ease),
+    box-shadow var(--dur) var(--ease-out),
+    transform var(--dur) var(--ease-out);
+}
+
+.home-topology-node:hover,
+.detail-node:hover {
+  transform: translateY(-2px);
+  border-color: var(--acid-line);
+}
+
+.home-topology-node.route-active,
+.detail-node.route-active {
+  border-color: var(--acid);
+  background: linear-gradient(180deg, #16241b, var(--surface-2));
+  box-shadow:
+    inset 0 -2px 0 var(--acid),
+    0 8px 22px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(184, 240, 120, 0.18);
+}
+
+/* The moving trace dot */
+.home-topology-signal,
+.detail-topology-signal {
+  fill: var(--acid-bright);
+  filter: drop-shadow(0 0 7px var(--acid));
+}
+
+/* ============================================================
+   9. RESPONSIVE TAP TARGETS AND SMALL-SCREEN TUNING
+   ============================================================
+
+   Note on type size: an earlier revision floored small text here with a long
+   list of override selectors. That was the wrong layer. The 164 sub-11px
+   declarations were raised to 11px at source in site.css, tools.css and
+   case-studies.css instead, so the cascade stays simple and there is nothing
+   to keep in sync. What remains below is genuinely responsive behaviour. */
+
+@media (max-width: 834px) {
+  /* Standalone call-to-action links need a real tap target. Links sitting
+     inside body paragraphs are exempt under WCAG 2.5.8 (inline exception). */
+  .case-study-card > a,
+  .detail-actions a,
+  .tools-card footer a,
+  .category-card footer a,
+  .project-card a.project-open,
+  .explore-card a,
+  .case-copy > a,
+  .about-panel a,
+  a[href^="mailto:"] {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+
+  /* Inline links still get a larger vertical hit area without disturbing
+     the line box. */
+  main p a,
+  main li a,
+  main dd a {
+    padding-block: 6px;
+  }
+
+  .footer-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 14px;
+  }
+
+  /* Topology node internals: keep the index clear of the corner arrow and
+     let descriptors wrap on a word rather than mid-phrase. */
+  .home-topology-node,
+  .detail-node {
+    padding: 12px 11px;
+    gap: 2px;
+  }
+
+  .home-topology-node span,
+  .detail-node small {
+    display: block;
+    padding-right: 18px;
+    line-height: 1.2;
+  }
+
+  .home-topology-node strong,
+  .detail-node strong {
+    display: block;
+    line-height: 1.25;
+    margin-top: 2px;
+  }
+
+  .home-topology-node small,
+  .detail-node span {
+    display: block;
+    line-height: 1.35;
+    margin-top: 3px;
+    text-wrap: balance;
+  }
+}
+
+/* Very narrow phones (320px): tighten gutters so cards keep their padding */
+@media (max-width: 380px) {
+  :root {
+    --gutter: 16px;
+  }
+
+  .reference-card,
+  .category-card,
+  .project-card,
+  .ai-card,
+  .net-card,
+  .layer-card,
+  .service-card,
+  .proof-card,
+  .interest-card,
+  .principle-card,
+  .explore-card,
+  .case-study-card,
+  .tech-card {
+    padding: 17px;
+  }
+
+  h1 {
+    font-size: clamp(1.9rem, 8.6vw, 2.5rem);
+  }
+}
+
+/* Large displays: stop the measure from stretching past comfortable reading */
+@media (min-width: 1800px) {
+  :root {
+    --page-max: 1560px;
+  }
+}
+
+/* --- <small> floor ------------------------------------------------------
+   The browser default for <small> is 0.8333em. Inside an 11px mono label
+   that computes to 9.17px, which is below the readable floor even though
+   every authored size in the stylesheets is now 11px or greater. These two
+   places nest <small> inside an already-small parent, so pin them.
+   ---------------------------------------------------------------------- */
+
+.osi-stack small,
+.net-label small {
+  font-size: 11px;
+}
