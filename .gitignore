@@ -4,3 +4,4 @@ __pycache__/
 npm-debug.log*
 .DS_Store
 *.swp
+.indexnow-key
