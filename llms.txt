@@ -35,6 +35,7 @@
 - Homelab and network canonical entity: https://ayron.in/projects/homelab-networking/#homelab
 - Every page on this site carries the same Person @id, so all mentions refer to one individual.
 - Quick factual answers, in question form: https://ayron.in/about/
+- Source code for the projects: https://github.com/ayronjins
 
 ## Project summary
 
